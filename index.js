@@ -2,7 +2,11 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const admin = require('firebase-admin');
+const MongoClient = require('mongodb').MongoClient;
+require('dotenv').config()
 
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.sqmks.mongodb.net/burjAlArab?retryWrites=true&w=majority`;
 const port = 5000
 
 const app = express()
@@ -11,17 +15,14 @@ app.use(cors());
 app.use(bodyParser.json());
 
 
-var serviceAccount = require("./burj-al-arab-master-firebase-adminsdk-xp7pk-b1fa0bb74a.json");
+var serviceAccount = require("./configs/burj-al-arab-master-firebase-adminsdk-xp7pk-b1fa0bb74a.json");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://burj-al-arab-master.firebaseio.com"
+    databaseURL: process.env.FIRE_DB
 });
 
 
-
-const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://arabian:ArabianHorse60@cluster0.sqmks.mongodb.net/burjAlArab?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
     const bookings = client.db("burjAlArab").collection("bookings");
@@ -42,7 +43,7 @@ client.connect(err => {
                     const tokenEmail = decodedToken.email;
                     const queryEmail = req.query.email;
                     if (tokenEmail == queryEmail) {
-                        bookings.find({ email: queryEmaill })
+                        bookings.find({ email: queryEmail })
                             .toArray((err, documents) => {
                                 res.status(200).send(documents);
                             })
