@@ -31,37 +31,32 @@ client.connect(err => {
             .then(result => {
                 res.send(result.insertedCount > 0);
             })
-        console.log(newBooking);
     })
 
     app.get('/bookings', (req, res) => {
         const bearer = req.headers.authorization;
         if (bearer && bearer.startsWith('Bearer ')) {
             const idToken = bearer.split(' ')[1];
-            console.log({ idToken });
             admin.auth().verifyIdToken(idToken)
                 .then(function (decodedToken) {
                     const tokenEmail = decodedToken.email;
                     const queryEmail = req.query.email;
-                    console.log(tokenEmail, queryEmail);
-                    if (tokenEmail == req.query.email) {
-                        bookings.find({ email: req.query.email })
+                    if (tokenEmail == queryEmail) {
+                        bookings.find({ email: queryEmaill })
                             .toArray((err, documents) => {
-                                res.send(documents);
+                                res.status(200).send(documents);
                             })
                     }
-
-                    console.log({ uid });
-                    // ...
+                    else {
+                        res.status(401).send('un-authorized access');
+                    }
                 }).catch(function (error) {
-                    // Handle error
+                    res.status(401).send('un-authorized access');
                 });
         }
-
-
-
-
-
+        else {
+            res.status(401).send('un-authorized access');
+        }
     })
 
 });
